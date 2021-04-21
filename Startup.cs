@@ -1,11 +1,15 @@
-using Catalog.Repositories;
 using Catalog.Repositories.Interfaces;
+using Catalog.Repositories.MongoDB;
+using Catalog.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
 namespace Catalog
 {
@@ -55,7 +59,17 @@ namespace Catalog
 
         public void RegisterDependences(IServiceCollection services)
         {
-            services.AddSingleton<IItemsRepository, InMemItemsRepository>();
+            BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
+            BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(MongoDB.Bson.BsonType.String));
+
+            services.AddSingleton<IMongoClient>(serviceProvicer => 
+            {
+                var settings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
+                return new MongoClient(settings.ConnectionString);
+            });
+
+            //services.AddSingleton<IItemsRepository, InMemItemsRepository>();
+            services.AddSingleton<IItemsRepository, MongoDbItemsRepository>();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using Catalog.Models;
 using Catalog.Repositories.Interfaces;
 
-namespace Catalog.Repositories
+namespace Catalog.Repositories.InMemory
 {
   public class InMemItemsRepository : IItemsRepository
   {
@@ -23,9 +23,11 @@ namespace Catalog.Repositories
       return model;
     }
 
-    public bool Delete(Item item)
+    public bool Delete(Guid id)
     {
-      return this.items.Remove(item);
+      var index = this.items.FindIndex(existingItem => existingItem.Id == id);
+      this.items.RemoveAt(index);
+      return true;
     }
 
     public IEnumerable<Item> GetAll()

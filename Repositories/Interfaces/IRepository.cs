@@ -9,6 +9,6 @@ namespace Catalog.Repositories.Interfaces
     Model GetById(Guid id);
     Model Create(Model model);
     void Update(Model model);
-    bool Delete(Model id);
+    bool Delete(Guid id);
   }
 }

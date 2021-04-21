@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Catalog.Models;
 using Catalog.Repositories.Interfaces;
 
@@ -17,36 +18,42 @@ namespace Catalog.Repositories.InMemory
       new Item { Id = Guid.NewGuid(), Name = "Boots", Price = 10, CreatedDate = DateTimeOffset.UtcNow },
     };
 
-    public Item Create(Item model)
+    public async Task<Item> CreateAsync(Item model)
     {
       items.Add(model);
-      return model;
+
+      return await Task<Item>.FromResult(model);
     }
 
-    public bool Delete(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
       var index = this.items.FindIndex(existingItem => existingItem.Id == id);
       this.items.RemoveAt(index);
-      return true;
+
+      return await Task.FromResult(true);
     }
 
-    public IEnumerable<Item> GetAll()
+    public async Task<IEnumerable<Item>> GetAllAsync()
     {
-      return items;
+      return await Task.FromResult(items);
     }
 
-    public Item GetById(Guid id)
+    public async Task<Item> GetByIdAsync(Guid id)
     {
-      return items.Where(item => item.Id == id).SingleOrDefault();
+      var item = items.Where(item => item.Id == id).SingleOrDefault();
+      return await Task.FromResult(item);
     }
 
-    public void Update(Item item)
+    public async Task UpdateAsync(Item item)
     {
       var index = this.items.FindIndex(existingItem => existingItem.Id == item.Id);
 
-      if(index == -1) return;
+      if(index >= 0)
+      {
+        this.items[index] = item;
+      }
 
-      this.items[index] = item;
+      await Task.CompletedTask;
     }
   }
 }
